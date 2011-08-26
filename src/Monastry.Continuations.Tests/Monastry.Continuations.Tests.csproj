@@ -52,7 +52,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Class1.cs" />
+    <Compile Include="ContinuationBasicTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -43,6 +43,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Continuation.cs" />
     <Compile Include="ObjectExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

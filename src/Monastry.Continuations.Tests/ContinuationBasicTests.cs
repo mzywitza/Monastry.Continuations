@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace Monastry.Continuations.Tests
 {
 	[TestFixture]
-	public class Class1
+	public class ContinuationBasicTests
 	{
 		[Test]
 		public void Test()
@@ -25,6 +25,59 @@ namespace Monastry.Continuations.Tests
 			proc.Process(o1);
 			proc.Process(o2);
 			proc.Process(o3);
+
+			Assert.That(c.SentConfirmations.Contains(o1), Is.False);
+			Assert.That(c.SentConfirmations.Contains(o2), Is.False);
+			Assert.That(c.SentConfirmations.Contains(o3), Is.True);
+		}
+
+		[Test]
+		public void ContinuationUsage()
+		{
+			var o1 = new Order(false, false);
+			var o2 = new Order(true, false);
+			var o3 = new Order(true, true);
+
+			var v = new OrderValidator();
+			var r = new OrderRepo();
+			var c = new OrderConfirmationSender();
+
+			var proc = new Continuation<Order>(
+				order => order
+					.When(o => v.Validate(o))
+					.When(o => r.Save(o))
+					.Do(o => c.Send(o)));
+
+			proc.Execute(o1);
+			proc.Execute(o2);
+			proc.Execute(o3);
+
+			Assert.That(c.SentConfirmations.Contains(o1), Is.False);
+			Assert.That(c.SentConfirmations.Contains(o2), Is.False);
+			Assert.That(c.SentConfirmations.Contains(o3), Is.True);
+		}
+
+		[Test]
+		public void ContinuationChaining()
+		{
+			var o1 = new Order(false, false);
+			var o2 = new Order(true, false);
+			var o3 = new Order(true, true);
+
+			var v = new OrderValidator();
+			var r = new OrderRepo();
+			var c = new OrderConfirmationSender();
+
+			var validate = new Continuation<Order>(order => order.When(o => v.Validate(o)));
+			var save = new Continuation<Order>(order => order.When(o => r.Save(o)));
+			var send = new Continuation<Order>(order => order.Do(o => c.Send(o)));
+			
+			var proc = new Continuation<Order>(
+				order => order.When(validate).When(save).Do(send));
+
+			proc.Execute(o1);
+			proc.Execute(o2);
+			proc.Execute(o3);
 
 			Assert.That(c.SentConfirmations.Contains(o1), Is.False);
 			Assert.That(c.SentConfirmations.Contains(o2), Is.False);
